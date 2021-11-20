@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
-import { addContact } from "../../redux/contacts/contacts-actions";
+import { getContacts } from "redux/contacts/contacts-selectors";
+import { addContact } from "redux/contacts/contacts-operations";
+import { toast } from "react-toastify";
 import s from "./PhonebookForm.module.css";
 
 export default function PhonebookForm() {
   const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
+  const [phone, setPhone] = useState("");
 
+  const items = useSelector(getContacts);
   const dispatch = useDispatch();
   const addNewContact = (contact) => dispatch(addContact(contact));
 
@@ -17,8 +20,8 @@ export default function PhonebookForm() {
       case "name":
         setName(value);
         break;
-      case "number":
-        setNumber(value);
+      case "phone":
+        setPhone(value);
         break;
       default:
         return;
@@ -27,13 +30,18 @@ export default function PhonebookForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    addNewContact({ name, number });
+    const normalizedContact = name.toLowerCase();
+    if (items.some((item) => item.name.toLowerCase() === normalizedContact)) {
+      toast.error(`${name} is already in contact list`);
+      return;
+    }
+    addNewContact({ name, phone });
     resetForm();
   };
 
   const resetForm = () => {
     setName("");
-    setNumber("");
+    setPhone("");
   };
 
   return (
@@ -52,16 +60,16 @@ export default function PhonebookForm() {
         />
       </label>
       <label className={s.label}>
-        Number
+        Phone number
         <input
           className={s.input}
           type="tel"
-          name="number"
+          name="phone"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
           required
           onChange={handleChange}
-          value={number}
+          value={phone}
         />
       </label>
       <button className={s.button} type="submit">
@@ -70,12 +78,6 @@ export default function PhonebookForm() {
     </form>
   );
 }
-
-// const mapDispatchToProps = (dispatch) => ({
-//   addNewContact: (contact) => dispatch(addContact(contact)),
-// });
-
-// export default connect(null, mapDispatchToProps)(PhonebookForm);
 
 PhonebookForm.propTypes = {
   addNewContact: PropTypes.func,

@@ -1,25 +1,16 @@
 import { combineReducers } from "redux";
 import { createReducer } from "@reduxjs/toolkit";
-import { addContact, deleteContact, changeFilter } from "./contacts-actions";
-import { toast } from "react-toastify";
-
-const checkContactName = (state, payload) => {
-  const { contact } = payload;
-  const normalizedContact = contact.name.toLowerCase();
-  if (
-    state.some(
-      ({ contact }) => contact.name.toLowerCase() === normalizedContact
-    )
-  ) {
-    toast.error(`${contact.name} is already in contact list`);
-    return state;
-  }
-  return [...state, payload];
-};
+import {
+  fetchContacts,
+  addContact,
+  deleteContact,
+} from "./contacts-operations";
+import { changeFilter } from "./contacts-actions";
 
 const items = createReducer([], {
-  [addContact]: (state, { payload }) => checkContactName(state, payload),
-  [deleteContact]: (state, { payload }) =>
+  [fetchContacts.fulfilled]: (_, { payload }) => payload,
+  [addContact.fulfilled]: (state, { payload }) => [...state, payload],
+  [deleteContact.fulfilled]: (state, { payload }) =>
     state.filter((contact) => contact.id !== payload),
 });
 
@@ -27,40 +18,33 @@ const filter = createReducer("", {
   [changeFilter]: (_, { payload }) => payload,
 });
 
+const loading = createReducer(false, {
+  [fetchContacts.pending]: () => true,
+  [fetchContacts.fulfilled]: () => false,
+  [fetchContacts.rejected]: () => false,
+  [addContact.pending]: () => true,
+  [addContact.fulfilled]: () => false,
+  [addContact.rejected]: () => false,
+  [deleteContact.pending]: () => true,
+  [deleteContact.fulfilled]: () => false,
+  [deleteContact.rejected]: () => false,
+});
+
+const error = createReducer(null, {
+  [fetchContacts.pending]: () => null,
+  [fetchContacts.fulfilled]: () => null,
+  [fetchContacts.rejected]: (_, action) => action.payload,
+  [addContact.pending]: () => null,
+  [addContact.fulfilled]: () => null,
+  [addContact.rejected]: (_, action) => action.payload,
+  [deleteContact.pending]: () => null,
+  [deleteContact.fulfilled]: () => null,
+  [deleteContact.rejected]: (_, action) => action.payload,
+});
+
 export default combineReducers({
   items,
   filter,
+  loading,
+  error,
 });
-
-// const items = (state = [], { type, payload }) => {
-//   switch (type) {
-//     case types.ADD:
-//       const { contact } = payload;
-//       const normalizedContact = contact.name.toLowerCase();
-//       if (
-//         state.some(
-//           ({ contact }) => contact.name.toLowerCase() === normalizedContact
-//         )
-//       ) {
-//         toast.error(`${contact.name} is already in contact list`);
-//         return state;
-//       }
-//       return [...state, payload];
-
-//     case types.DELETE:
-//       return state.filter((contact) => contact.id !== payload);
-
-//     default:
-//       return state;
-//   }
-// };
-
-// const filter = (state = "", { type, payload }) => {
-//   switch (type) {
-//     case types.CHANGE_FILTER:
-//       return payload;
-
-//     default:
-//       return state;
-//   }
-// };
