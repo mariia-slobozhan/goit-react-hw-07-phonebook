@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
-import { getContacts } from "redux/contacts/contacts-selectors";
-import { addContact } from "redux/contacts/contacts-operations";
 import { toast } from "react-toastify";
 import s from "./PhonebookForm.module.css";
+import {
+  useGetContactsQuery,
+  useAddContactMutation,
+} from "redux/contacts/contactsSlice";
 
 export default function PhonebookForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
-  const items = useSelector(getContacts);
-  const dispatch = useDispatch();
-  const addNewContact = (contact) => dispatch(addContact(contact));
+  const { data } = useGetContactsQuery();
+  const [addContact, { isLoading }] = useAddContactMutation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,11 +31,11 @@ export default function PhonebookForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const normalizedContact = name.toLowerCase();
-    if (items.some((item) => item.name.toLowerCase() === normalizedContact)) {
+    if (data.some((item) => item.name.toLowerCase() === normalizedContact)) {
       toast.error(`${name} is already in contact list`);
       return;
     }
-    addNewContact({ name, phone });
+    addContact({ name, phone });
     resetForm();
   };
 
@@ -72,7 +72,7 @@ export default function PhonebookForm() {
           value={phone}
         />
       </label>
-      <button className={s.button} type="submit">
+      <button disabled={isLoading} className={s.button} type="submit">
         Add contact
       </button>
     </form>
@@ -80,5 +80,5 @@ export default function PhonebookForm() {
 }
 
 PhonebookForm.propTypes = {
-  addNewContact: PropTypes.func,
+  addContact: PropTypes.func,
 };
