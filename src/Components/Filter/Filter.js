@@ -21,16 +21,6 @@ export default function Filter() {
     </label>
   );
 }
-// const mapStateToProps = (state) => ({
-//   value: state.contacts.filter
-
-// })
-
-// const mapDispatchToProps = dispatch => ({
-//   onChange: e => dispatch(changeFilter(e.target.value))
-// })
-
-// export default connect(mapStateToProps, mapDispatchToProps)(Filter)
 
 Filter.propTypes = {
   value: PropTypes.string,

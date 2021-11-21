@@ -36,6 +36,7 @@ export default function PhonebookForm() {
       return;
     }
     addContact({ name, phone });
+    toast.success(`${name} is added to contact list!`);
     resetForm();
   };
 

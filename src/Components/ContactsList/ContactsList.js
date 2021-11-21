@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import { filterValue } from "redux/contacts/contacts-selectors";
 import { useGetContactsQuery } from "redux/contacts/contactsSlice";
 import ContactItem from "../ContactItem/ContactItem";
@@ -32,3 +33,8 @@ export default function ContactList() {
     </ul>
   );
 }
+
+ContactList.propTypes = {
+  value: PropTypes.string,
+  useGetContactsQuery: PropTypes.func,
+};
